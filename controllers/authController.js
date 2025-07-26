@@ -69,3 +69,47 @@ exports.login = async (req, res) => {
   }
 };
 
+
+// Forgot Password
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' } // expires in 15 minutes
+    );
+
+    // Simulate email with link
+    const resetLink = `http://localhost:5000/api/auth/reset-password/${token}`;
+    res.status(200).json({ message: 'Reset link generated', resetLink });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Reset Password
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (err) {
+    res.status(400).json({ message: 'Invalid or expired token' });
+  }
+};
+
