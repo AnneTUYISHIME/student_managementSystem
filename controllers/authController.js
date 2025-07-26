@@ -1,6 +1,8 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const sendEmail = require('../utils/sendEmail');
+
 
 exports.register = async (req, res) => {
   try {
@@ -81,16 +83,27 @@ exports.forgotPassword = async (req, res) => {
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: '15m' } // expires in 15 minutes
+      { expiresIn: '15m' }
     );
 
-    // Simulate email with link
     const resetLink = `http://localhost:5000/api/auth/reset-password/${token}`;
-    res.status(200).json({ message: 'Reset link generated', resetLink });
+
+    const emailBody = `
+      <h3>Password Reset Request</h3>
+      <p>Click the link below to reset your password:</p>
+      <a href="${resetLink}">${resetLink}</a>
+      <p>This link will expire in 15 minutes.</p>
+    `;
+
+    await sendEmail(email, 'Reset Your Password', emailBody);
+
+    res.status(200).json({ message: 'Reset link sent to email' });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 // Reset Password
 exports.resetPassword = async (req, res) => {

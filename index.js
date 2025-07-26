@@ -16,6 +16,8 @@ app.get('/ping', (req, res) => {
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/uploads', require('./routes/uploadRoutes'));
+
 console.log('Loaded /api/auth routes');
 
 app.use('/api/students', require('./routes/studentRoutes'));
