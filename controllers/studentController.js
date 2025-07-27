@@ -1,10 +1,33 @@
 const User = require('../models/User');
 
 // GET all students
+// GET all students with optional filtering by course
 exports.getAllStudents = async (req, res) => {
-  const students = await User.find({ role: 'student' });
-  res.json(students);
+  try {
+    const query = { role: 'student' };
+
+    // Filter by course if provided
+    if (req.query.course) {
+      query.course = req.query.course;
+    }
+
+    // Optional: You could also filter by year or status if needed
+    if (req.query.enrollmentYear) {
+      query.enrollmentYear = req.query.enrollmentYear;
+    }
+
+    if (req.query.status) {
+      query.status = req.query.status;
+    }
+
+    const students = await User.find(query).select('-password');
+    res.json(students);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
+
 
 // GET single student
 exports.getStudent = async (req, res) => {
