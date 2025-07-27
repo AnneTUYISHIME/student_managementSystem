@@ -58,3 +58,38 @@ exports.toggleUserRole = async (req, res) => {
 
   res.json({ message: `Role changed to ${user.role}` });
 };
+
+// @desc    Get logged-in student's profile
+exports.getMyProfile = async (req, res) => {
+  try {
+    const student = await User.findById(req.user.id).select('-password');
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+    res.json(student);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Update logged-in student's profile
+exports.updateMyProfile = async (req, res) => {
+  try {
+    const student = await User.findById(req.user.id);
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+
+    // Only update allowed fields
+    student.fullName = req.body.fullName || student.fullName;
+    student.phone = req.body.phone || student.phone;
+
+    // Optional image upload
+    if (req.file && req.file.path) {
+      student.imageUrl = req.file.path;
+    }
+
+    await student.save();
+
+    res.status(200).json({ message: 'Profile updated successfully', student });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
