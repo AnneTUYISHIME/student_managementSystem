@@ -16,6 +16,12 @@ const { protect, isAdmin } = require('../middleware/authMiddleware');
 const upload = require('../config/cloudinary');
 
 
+
+// Student self-service routes
+
+router.get('/me', protect, getMyProfile);
+router.put('/me', protect, upload.single('image'), updateMyProfile);
+
 // Admin only routes
 
 router.get('/', protect, isAdmin, getAllStudents);
@@ -26,9 +32,6 @@ router.delete('/:id', protect, isAdmin, deleteStudent);
 router.patch('/role/:id', protect, isAdmin, toggleUserRole);
 
 
-// Student self-service routes
 
-router.get('/me', protect, getMyProfile);
-router.put('/me', protect, upload.single('image'), updateMyProfile);
 
 module.exports = router;

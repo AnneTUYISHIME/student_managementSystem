@@ -86,7 +86,8 @@ exports.forgotPassword = async (req, res) => {
       { expiresIn: '15m' }
     );
 
-    const resetLink = `http://localhost:5000/api/auth/reset-password/${token}`;
+    const resetLink = `http://localhost:3000/reset-password/${token}`;
+
 
     const emailBody = `
       <h3>Password Reset Request</h3>
