@@ -6,6 +6,9 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
+console.log("✅ /api/auth routes loaded");
+
+
 
 
 module.exports = router;
