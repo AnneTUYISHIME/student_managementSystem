@@ -1,21 +1,28 @@
 const nodemailer = require('nodemailer');
 
 const sendEmail = async (to, subject, html) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      secure: false, // use TLS
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-  await transporter.sendMail({
-    from: `"Student System 👩‍🎓" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html
-  });
+    const info = await transporter.sendMail({
+      from: `"Student System 👩‍🎓" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    });
+
+    console.log("✅ Email sent: ", info.messageId);
+  } catch (err) {
+    console.error("❌ Email send failed:", err);
+  }
 };
 
 module.exports = sendEmail;
