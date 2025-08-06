@@ -1,17 +1,14 @@
 const User = require('../models/User');
 
 // GET all students
-// GET all students with optional filtering by course
 exports.getAllStudents = async (req, res) => {
   try {
     const query = { role: 'student' };
 
-    // Filter by course if provided
     if (req.query.course) {
       query.course = req.query.course;
     }
 
-    // Optional: You could also filter by year or status if needed
     if (req.query.enrollmentYear) {
       query.enrollmentYear = req.query.enrollmentYear;
     }
@@ -27,7 +24,6 @@ exports.getAllStudents = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 
 // GET single student
 exports.getStudent = async (req, res) => {
@@ -93,19 +89,19 @@ exports.getMyProfile = async (req, res) => {
   }
 };
 
-// @desc    Update logged-in student's profile
+// @desc    Update logged-in student's profile including image upload
 exports.updateMyProfile = async (req, res) => {
   try {
     const student = await User.findById(req.user.id);
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
-    // Only update allowed fields
+    // Update basic fields
     student.fullName = req.body.fullName || student.fullName;
     student.phone = req.body.phone || student.phone;
 
-    // Optional image upload
+    // Update imageUrl if image uploaded
     if (req.file && req.file.path) {
-      student.imageUrl = req.file.path;
+      student.imageUrl = req.file.path; // Cloudinary URL from multer-storage-cloudinary
     }
 
     await student.save();

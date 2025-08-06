@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 
-
+// Register user
 exports.register = async (req, res) => {
   try {
     const { fullName, email, phone, password, role, course, enrollmentYear } = req.body;
@@ -40,6 +40,7 @@ exports.register = async (req, res) => {
   }
 };
 
+// Login user
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -71,7 +72,6 @@ exports.login = async (req, res) => {
   }
 };
 
-
 // Forgot Password
 exports.forgotPassword = async (req, res) => {
   try {
@@ -90,7 +90,6 @@ exports.forgotPassword = async (req, res) => {
 
     const resetLink = `http://localhost:3000/reset-password/${token}`;
 
-
     const emailBody = `
       <h3>Password Reset Request</h3>
       <p>Click the link below to reset your password:</p>
@@ -107,12 +106,11 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-
 // Reset Password
 exports.resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
-    const { password } = req.body; // ✅ updated
+    const { password } = req.body;
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
@@ -129,3 +127,37 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+// ✅ NEW: Create student from admin dashboard (with password hashing)
+exports.createStudent = async (req, res) => {
+  try {
+    const { fullName, email, phone, password, course, enrollmentYear } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10); // ✅ Hash the password
+
+    const newUser = new User({
+      fullName,
+      email,
+      phone,
+      password: hashedPassword, // ✅ Save hashed password
+      role: "student",
+      course,
+      enrollmentYear
+    });
+
+    await newUser.save();
+
+    res.status(201).json({ message: "Student created successfully" });
+  } catch (err) {
+    console.error("❌ Failed to create student:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
