@@ -20,7 +20,9 @@ app.get('/ping', (req, res) => {
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/uploads', require('./routes/uploadRoutes'));
+//app.use('/api/uploads', require('./routes/uploadRoutes'));
+app.use('/api/cloud', require('./routes/uploadRoutes'));
+
 
 console.log('Loaded /api/auth routes');
 
